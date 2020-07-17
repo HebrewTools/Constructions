@@ -86,14 +86,16 @@ gEditor{|Group|} = bijectEditorValue
 		(Label "Feature" @>> FIELD_WIDTH @>> gEditor{|*|}))
 
 gEditor{|Pattern|} = bijectEditorValue
-	(\p -> (p.lexeme, fst p.context_size, snd p.context_size, (), p.groups))
-	(\(l,b,a,_,gs) -> {lexeme=l, groups=gs, context_size=(b,a)})
+	(\p -> (p.lexeme, fst p.context_size, snd p.context_size, p.skip_article, ((), p.groups)))
+	(\(l,b,a,sa,(_,gs)) -> {lexeme=l, groups=gs, context_size=(b,a), skip_article=sa})
 	(container5
 		(Label "Lexeme"       @>> FIELD_WIDTH @>> minlengthAttr 1 @>> textField)
 		(Label "Words before" @>> FIELD_WIDTH @>> minAttr 0 @>> maxAttr 10 @>> integerField)
 		(Label "Words after"  @>> FIELD_WIDTH @>> minAttr 0 @>> maxAttr 10 @>> integerField)
-		(viewConstantValue "Group the results on:" textView)
-		gEditor{|*|})
+		(Label "Skip definite article" @>> checkBox)
+		(container2
+			(viewConstantValue "Group the results on:" textView)
+			gEditor{|*|}))
 
 resultsEditor :: Editor (Pattern, [Result])
 resultsEditor = comapEditorValue format htmlView
@@ -124,8 +126,8 @@ where
 			, toString verse
 			]
 
-		wordToHtml {word,features} =
-			[ DivTag [ClassAttr "hebrew"] [Text word]
+		wordToHtml {hebrew,features} =
+			[ DivTag [ClassAttr "hebrew"] [Text hebrew]
 			:
 				[ DivTag [ClassAttr ("ft ft-"+++toString ft)] [Text val]
 				\\ (ft, val) <- 'Map'.toList features
@@ -256,7 +258,7 @@ main =
 	ScrollContent @>>
 	(
 		(ScrollContent @>>
-			foreverSt {lexeme="", groups=[], context_size=(0,0)}
+			foreverSt {lexeme="", groups=[], context_size=(0,0), skip_article=False}
 			(\p ->
 				viewInformation [] explanation ||-
 				updateInformation [] p >>*

@@ -13,6 +13,7 @@ from Bible import :: Reference
 	{ lexeme       :: !String       //* The lexeme that we search for
 	, groups       :: ![Group]      //* How to group the occurrences
 	, context_size :: !(!Int, !Int) //* Number of words to display before and after the search lexeme
+	, skip_article :: !Bool         //* Skip the definite article (prepend it to the next word)
 	}
 
 :: Group =
@@ -39,7 +40,7 @@ from Bible import :: Reference
 	}
 
 :: ResultWord =
-	{ word     :: !String                  //* Hebrew text
+	{ hebrew   :: !String                  //* Hebrew text
 	, features :: !Map GroupFeature String //* Relevant features
 	}
 

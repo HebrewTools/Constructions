@@ -124,19 +124,43 @@ where
 			, verse   = toInt (get_node_feature verse verse_ref)
 			}
 		, words =
-			{ make_word i n
-			\\ n <- [node_ref-before..node_ref+after]
+			{ make_word i main_node all_nodes
+			\\ (main_node,all_nodes) <-
+				reverse (find_words True (before+1) node_ref data) ++
+				find_words False after (node_ref+1) data
 			& i <- [0..]
-			| 0 <= n && n < size data.nodes &&
-				get_node_feature otype data.nodes.[n] == "word"
 			}
 		}
 	where
 		(Just verse_ref) = get_first_ancestor_node_with (isOfType "verse") node_ref data
 
-		make_word i node_ref =
+		// Each result tuple consists of the actual word, and a list of nodes
+		// that can be used for displaying (the latter may for instance include
+		// definite articles when these are skipped).
+		find_words backwards n node data
+			| n <= 0 ||
+					node < 0 || node >= size data.nodes ||
+					get_node_feature otype data.nodes.[node] <> "word"
+				= []
+			| not pattern.skip_article
+				=
+					[ (i, [i])
+					\\ i <- if backwards [node-n..node] [node+1..node+n]
+					| 0 <= i && i < size data.nodes &&
+						get_node_feature otype data.nodes.[i] == "word"
+					]
+			| backwards
+				| node-1 >= 0 && get_node_feature lex data.nodes.[node-1] == "H"
+					= [(node, [node-1,node]) : find_words backwards (n-1) (node-2) data]
+					= [(node, [node]) : find_words backwards (n-1) (node-1) data]
+			| otherwise
+				| node+1 < size data.nodes && get_node_feature lex data.nodes.[node] == "H"
+					= [(node+1, [node,node+1]) : find_words backwards (n-1) (node+2) data]
+					= [(node, [node]) : find_words backwards (n-1) (node+1) data]
+
+		make_word i node_ref all_nodes =
 			{ ResultWord
-			| word     = 'Text'.trim ('Text'.concat [text \\ (_,text) <- get_text node_ref data])
+			| hebrew   = 'Text'.trim ('Text'.concat [text \\ n <- all_nodes, (_,text) <- get_text n data])
 			, features = 'Map'.fromList
 				[ (feature, get_node_feature id node)
 				\\ (feature,id) <- features.[i]
