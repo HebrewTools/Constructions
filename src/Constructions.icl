@@ -96,7 +96,7 @@ search :: !Pattern !DataSet -> [Result]
 search pattern data
 	# node_refs = find pattern.lexeme data
 	# results = [make_result features n data \\ n <|- node_refs]
-	= foldr group_and_flatten results pattern.groups
+	= flatten (group pattern.groups results)
 where
 	(before,after) = pattern.context_size
 
@@ -154,9 +154,14 @@ where
 		# groups = sortBy ((>) `on` length) groups
 		= flatten groups
 
-	group _ []
+	group [] results
+		= [results]
+	group [rule:rules] results
+		= [flatten (group rules g) \\ g <- groups rule results]
+
+	groups _ []
 		= []
-	group g=:{word,feature} [r:rs]
+	groups g=:{word,feature} [r:rs]
 		# val = fromJust ('Map'.get feature r.words.[word+before].ResultWord.features)
 		# (yes,no) = partition (\r -> fromJust ('Map'.get feature r.words.[word+before].ResultWord.features) == val) rs
-		= [[r:yes]:group g no]
+		= [[r:yes]:groups g no]
