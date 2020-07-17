@@ -1,0 +1,69 @@
+Version: 1.5
+Global
+	ProjectRoot:	.
+	Target:	iTasks
+	Exec:	{Project}/server
+	ByteCode:	{Project}/server.bc
+	CodeGen
+		CheckStacks:	False
+		CheckIndexes:	True
+		OptimiseABC:	True
+		GenerateByteCode:	True
+	Application
+		HeapSize:	33554432
+		StackSize:	1048576
+		ExtraMemory:	81920
+		IntialHeapSize:	204800
+		HeapSizeMultiplier:	4096
+		ShowExecutionTime:	False
+		ShowGC:	False
+		ShowStackSize:	False
+		MarkingCollector:	False
+		DisableRTSFlags:	False
+		StandardRuntimeEnv:	True
+		Profile
+			Memory:	False
+			MemoryMinimumHeapSize:	0
+			Time:	True
+			Callgraph:	False
+			Stack:	True
+			Dynamics:	True
+			GenericFusion:	False
+			DescExL:	True
+		Output
+			Output:	ShowConstructors
+			Font:	Courier
+			FontSize:	9
+			WriteStdErr:	False
+	Link
+		LinkMethod:	Static
+		GenerateRelocations:	False
+		GenerateSymbolTable:	True
+		GenerateLinkMap:	False
+		LinkResources:	False
+		ResourceSource:	
+		GenerateDLL:	False
+		ExportedNames:	
+		StripByteCode:	True
+		KeepByteCodeSymbols:	True
+		PrelinkByteCode:	True
+	Paths
+		Path:	{Project}
+		Path:	{Project}*bible-references
+		Path:	{Project}*text-fabric
+	Precompile:	
+	Postlink:	
+MainModule
+	Name:	server
+	Dir:	{Project}
+	Compiler
+		NeverMemoryProfile:	False
+		NeverTimeProfile:	False
+		StrictnessAnalysis:	True
+		ListTypes:	StrictExportTypes
+		ListAttributes:	True
+		Warnings:	True
+		Verbose:	True
+		ReadableABC:	False
+		ReuseUniqueNodes:	True
+		Fusion:	False

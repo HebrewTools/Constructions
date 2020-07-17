@@ -1,0 +1,11 @@
+*.abc
+*.bc
+*.o
+*.tcl
+
+*.pbc
+*.prj
+*-www/
+
+search
+server

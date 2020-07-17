@@ -1,0 +1,6 @@
+[submodule "src/text-fabric"]
+	path = src/text-fabric
+	url = https://gitlab.com/camilstaps/text-fabric.git
+[submodule "src/bible-references"]
+	path = src/bible-references
+	url = https://gitlab.com/camilstaps/bible-references.git

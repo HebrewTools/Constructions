@@ -1,0 +1,31 @@
+@font-face {
+	font-family: 'Ezra SIL';
+	src: url(/fonts/SILEOT.woff);
+}
+
+.itasks-list .itasks-label {
+	width: 50px;
+}
+
+input {
+	box-sizing: border-box;
+}
+
+summary {
+	cursor: pointer;
+	outline: none;
+}
+
+table.results {
+	border-spacing: 0;
+}
+
+table.results th:nth-child(n+2) {
+	text-align: right;
+}
+
+table.results .hebrew {
+	font-family: 'Ezra SIL';
+	font-size: 130%;
+	text-align: right;
+}
