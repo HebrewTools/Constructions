@@ -66,10 +66,6 @@ where
 
 instance < GroupFeature where (<) x y = toString x < toString y
 
-//* A human-readable representation of a feature value.
-pretty_feature :: !GroupFeature !String -> String
-pretty_feature _ s = s // TODO
-
 check_pattern :: !Pattern -> Maybe String
 check_pattern {lexeme,groups,context_size=ctx=:(before,after)} =
 	empty_lexeme <|>
@@ -149,15 +145,12 @@ where
 		where
 			node = data.nodes.[node_ref]
 
-	group_and_flatten rule results
-		# groups = group rule results
-		# groups = sortBy ((>) `on` length) groups
-		= flatten groups
-
 	group [] results
 		= [results]
 	group [rule:rules] results
-		= [flatten (group rules g) \\ g <- groups rule results]
+		= sortBy
+			((>) `on` length)
+			[flatten (group rules g) \\ g <- groups rule results]
 
 	groups _ []
 		= []
