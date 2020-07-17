@@ -28,6 +28,10 @@ table.results tbody tr:nth-child(2n+1) {
 	background: lightgrey;
 }
 
+table.results td {
+	padding: 1px 0;
+}
+
 table.results td:nth-child(n+2) {
 	vertical-align: top;
 }
