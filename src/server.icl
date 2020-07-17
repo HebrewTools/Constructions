@@ -168,12 +168,14 @@ maybeStartSearchBackend =
 startSearchBackend :: Task ()
 startSearchBackend =
 	get applicationDirectory >>- \dir ->
-	appendTopLevelTask 'Map'.newMap True
-		(externalProcess
+	appendTopLevelTask 'Map'.newMap True (
+		externalProcess
 			{tv_sec=1,tv_nsec=0}
 			(dir </> "search") [] (Just dir)
 			externalProcessGraceful Nothing
-			search_stdin search_stdouterr) >>- \id ->
+			search_stdin search_stdouterr >-|
+		set Nothing search_backend
+	) >>- \id ->
 	set (Just (id, False)) search_backend @! ()
 
 stopSearchBackend :: Task ()
@@ -187,12 +189,17 @@ stopSearchBackend =
 
 // TODO: using stdout for the communication is rather slow...
 search :: !Pattern -> Task [Result]
-search pattern = ApplyLayout (setUIType UILoader) @>> (
+search pattern = ApplyLayout replaceWithLoader @>> (
 	wait (\b -> isNothing b || not (snd (fromJust b))) search_backend >-|
 	maybeStartSearchBackend >-|
 	upd (\(Just (id,_)) -> Just (id, True)) search_backend >-|
 	set ([], []) search_stdouterr >-|
 	set [toString (toJSON pattern) +++ "\n"] search_stdin >-|
+	(
+		ApplyLayout hideUI @>>
+		wait isNothing search_backend >-|
+		throw "search backend crashed" @! ()
+	) ||-
 	foreverStIf
 		(\s
 			| size s < IF_INT_64_OR_32 8 4 -> True
@@ -224,6 +231,8 @@ search pattern = ApplyLayout (setUIType UILoader) @>> (
 	)
 where
 	stdout = mapReadWrite (fst, \out (_,err) -> Just (out,err)) Nothing search_stdouterr
+
+	replaceWithLoader = sequenceLayouts [removeSubUIs (SelectByDepth 1), setUIType UILoader]
 
 derive gDefault TaskListFilter, TaskId
 derive gEq TaskMeta, TaskChange, InstanceType
@@ -267,10 +276,13 @@ main =
 		onChange pattern \pattern -> case pattern of
 			Just pattern -> case check_pattern pattern of
 				Nothing ->
-					search pattern >>- \results ->
-					if (isEmpty results)
-						(Hint "Warning:" @>> viewInformation [] "No results." @! ())
-						(viewInformation [ViewUsing (tuple pattern) resultsEditor] results @! ())
+					catchAll (
+						search pattern >>- \results ->
+						if (isEmpty results)
+							(Hint "Warning:" @>> viewInformation [] "No results." @! ())
+							(viewInformation [ViewUsing (tuple pattern) resultsEditor] results @! ())
+					)
+						(\e -> viewInformation [] ("Error: "+++e+++".") @! ())
 				Just err ->
 					Hint "Error:" @>>
 					viewInformation [] err @! ()
