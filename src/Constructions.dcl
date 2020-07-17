@@ -1,6 +1,7 @@
 definition module Constructions
 
 from StdMaybe import :: Maybe
+from StdOverloaded import class toString
 
 from Data.Map import :: Map
 
@@ -41,6 +42,8 @@ from Bible import :: Reference
 	{ word     :: !String                  //* Hebrew text
 	, features :: !Map GroupFeature String //* Relevant features
 	}
+
+instance toString GroupFeature
 
 //* The text-fabric features required to use this module (use when calling `import_tf`).
 required_features :: [String]

@@ -108,7 +108,7 @@ where
 		, TbodyTag []
 			[ TrTag []
 				[ TdTag [] [Text (formatReference reference)]
-				: reverse [TdTag [] [wordToHtmlTag w] \\ w <-: words]
+				: reverse [TdTag [] (wordToHtml w) \\ w <-: words]
 				]
 			\\ {reference,words} <- results
 			]
@@ -124,7 +124,13 @@ where
 			, toString verse
 			]
 
-		wordToHtmlTag {word,features} = DivTag [ClassAttr "hebrew"] [Text word]
+		wordToHtml {word,features} =
+			[ DivTag [ClassAttr "hebrew"] [Text word]
+			:
+				[ DivTag [ClassAttr ("ft ft-"+++toString ft)] [Text val]
+				\\ (ft, val) <- 'Map'.toList features
+				]
+			]
 
 Start w = doTasks
 	[ onStartup stopSearchBackendWhenInactive

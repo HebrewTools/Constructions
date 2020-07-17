@@ -24,8 +24,22 @@ table.results th:nth-child(n+2) {
 	text-align: right;
 }
 
+table.results tbody tr:nth-child(2n+1) {
+	background: lightgrey;
+}
+
+table.results td:nth-child(n+2) {
+	vertical-align: top;
+}
+
 table.results .hebrew {
 	font-family: 'Ezra SIL';
 	font-size: 130%;
 	text-align: right;
+}
+
+div.ft {
+	color: #666;
+	font-size: 85%;
+	margin-left: 1em;
 }
