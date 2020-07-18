@@ -12,6 +12,7 @@ import System.Time
 from Text import class Text, instance Text String
 import qualified Text
 import Text.HTML
+import Text.Language
 
 import iTasks
 import iTasks.Extensions.DateTime
@@ -115,27 +116,40 @@ where
 		(before,after) = pattern.context_size
 
 		makeTableRows _ _ [] = []
-		makeTableRows i groups [r:rs] =
-			[ TrTag [] $
-				[ TdTag [] $ case [g \\ g <- these_groups | g.group_index==j] of
-					[]    -> []
-					[g:_] -> [DivTag [ClassAttr "group"] [Text ('Text'.concat
-						[ toString word
-						, "."
-						, toString feature
-						, ": "
-						, g.GroupStart.value
-						])]]
-				\\ {word,feature} <- pattern.groups
-				& j <- [0..]
-				] ++
-				[ TdTag [] [Text (formatReference r.reference)]
-				: reverse [TdTag [] (wordToHtml w) \\ w <-: r.words]
+		makeTableRows i groups all_results=:[r:rs]
+			| isEmpty groups || (hd groups).result_index <> i =
+				[ TrTag [] $
+					[ TdTag [] [] \\ {word,feature} <- pattern.groups
+					] ++
+					[ TdTag [] [Text (formatReference r.reference)]
+					: reverse [TdTag [] (wordToHtml w) \\ w <-: r.words]
+					]
+				: makeTableRows (i+1) groups rs
 				]
-			: makeTableRows (i+1) rest_groups rs
-			]
+			| otherwise = let [g:gs] = groups in
+				[ TrTag [ClassAttr "header"] $
+					[ TdTag [] $ if (g.group_index==j)
+						[DivTag [ClassAttr "group"] [Text ('Text'.concat
+							[ toString word
+							, "."
+							, toString feature
+							, ": "
+							, g.GroupStart.value
+							])]]
+						[]
+					\\ {word,feature} <- pattern.groups
+					& j <- [0..]
+					] ++
+					[ TdTag
+						[ColspanAttr (toString (size r.words+1))]
+						[Text (pluralisen English (n_results g.group_index) "result")]
+					]
+				: makeTableRows i gs all_results
+				]
 		where
-			(these_groups,rest_groups) = span (\g -> g.result_index==i) groups
+			n_results gi = case dropWhile (\g -> g.group_index > gi) (tl groups) of
+				[]    -> length rs+1
+				[g:_] -> g.result_index-i
 
 		formatReference {book,chapter,verse} = 'Text'.concat
 			[ englishName book
