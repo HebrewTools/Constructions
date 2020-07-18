@@ -87,8 +87,8 @@ gEditor{|Group|} = bijectEditorValue
 	(\g -> (g.Group.word, g.Group.feature))
 	(\(w,f) -> {word=w, feature=f})
 	(container2
-		(Label "Word"    @>> FIELD_WIDTH @>> integerField)
-		(Label "Feature" @>> FIELD_WIDTH @>> gEditor{|*|}))
+		(Label "Word" @>> FIELD_WIDTH @>> integerField)
+		(Label "Feature" @>> widthAttr (ExactSize 160) @>> gEditor{|*|}))
 
 gEditor{|Pattern|} = bijectEditorValue
 	(\p -> (p.lexeme, fst p.context_size, snd p.context_size, p.skip_article, ((), p.groups)))
@@ -175,6 +175,8 @@ where
 		# (cb,w) = jsWrapFun (jsInit` me) me w
 		= (me .# "initDOMEl" .= cb) w
 	jsInit` me _ w
+		# w = (me .# "domEl" .# "style" .# "boxSizing" .= "border-box") w
+		# w = (me .# "domEl" .# "style" .# "width" .= "100%") w
 		# w = (me .# "domEl" .# "innerHTML" .= me .# "attributes" .# "value") w
 		# (cb,w) = jsWrapFun (jsInit`` me) me w
 		= addJSFromUrl "/js/construction-table.js" (Just cb) w
