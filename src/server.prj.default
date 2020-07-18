@@ -10,7 +10,7 @@ Global
 		OptimiseABC:	True
 		GenerateByteCode:	True
 	Application
-		HeapSize:	33554432
+		HeapSize:	67108864
 		StackSize:	1048576
 		ExtraMemory:	81920
 		IntialHeapSize:	204800

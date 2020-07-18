@@ -277,6 +277,7 @@ search pattern = ApplyLayout replaceWithLoader @>> (
 			  out = out % (IF_INT_64_OR_32 8 4, IF_INT_64_OR_32 7 3 + len)
 			->
 				set [rest] stdout >-|
+				if (len > 750000) (throw "too many results (try to reduce the context size)")
 				case decode out of
 					Just results ->
 						upd (\(Just (id,_)) -> Just (id, False)) search_backend >-|
