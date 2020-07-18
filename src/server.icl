@@ -9,6 +9,7 @@ import qualified Data.Map as Map
 import Data.Tuple
 import System.FilePath
 import System.Time
+import System._Unsafe
 from Text import class Text, instance Text String
 import qualified Text
 import Text.HTML
@@ -18,6 +19,8 @@ import iTasks
 import iTasks.Extensions.DateTime
 import iTasks.Internal.TaskState
 import iTasks.UI.Editor.Common
+
+import ABC.Interpreter.JavaScript
 
 import TextFabric.Import
 
@@ -100,7 +103,7 @@ gEditor{|Pattern|} = bijectEditorValue
 			gEditor{|*|}))
 
 resultsEditor :: Editor (Pattern, ([GroupStart], [Result]))
-resultsEditor = comapEditorValue format htmlView
+resultsEditor = editorWithClientSideInit jsInit (comapEditorValue format htmlView)
 where
 	format :: !(!Pattern, !(![GroupStart], ![Result])) -> HtmlTag
 	format (pattern, (groups, results)) = TableTag [ClassAttr "results"]
@@ -108,7 +111,7 @@ where
 			[ TrTag [] $
 				[ThTag [] [Text (toString word+++"."+++toString feature)] \\ {word,feature} <- pattern.groups] ++
 				[ThTag [] [Text "Reference"]] ++
-				[ThTag [] [Text (toString i)] \\ i <- [after,after-1..0-before]]
+				[ThTag [ClassAttr "word-header"] [Text (toString i)] \\ i <- [after,after-1..0-before]]
 			]
 		, TbodyTag [] (makeTableRows 0 groups results)
 		]
@@ -166,6 +169,24 @@ where
 				\\ (ft, val) <- 'Map'.toList features
 				]
 			]
+
+	jsInit :: !JSVal !*JSWorld -> *JSWorld
+	jsInit me w
+		# (cb,w) = jsWrapFun (jsInit` me) me w
+		= (me .# "initDOMEl" .= cb) w
+	jsInit` me _ w
+		# w = (me .# "domEl" .# "innerHTML" .= me .# "attributes" .# "value") w
+		# (cb,w) = jsWrapFun (jsInit`` me) me w
+		= addJSFromUrl "/js/construction-table.js" (Just cb) w
+	jsInit`` me _ w
+		= (jsGlobal "initConstructionTable" .$! me .# "domEl") w
+
+editorWithClientSideInit :: !(JSVal *JSWorld -> *JSWorld) !(Editor a) -> Editor a
+editorWithClientSideInit init editor=:{Editor | genUI} =
+	{ Editor
+	| editor
+	& genUI = withClientSideInit init (unsafeCoerce genUI) // TODO: this should be possible without unsafeCoerce
+	}
 
 Start w = doTasks
 	[ onStartup stopSearchBackendWhenInactive
