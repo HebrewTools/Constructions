@@ -88,11 +88,12 @@ where
 			= Just "It is not necessary to group on (0, Lexeme)."
 			= Nothing
 
-search :: !Pattern !DataSet -> [Result]
+search :: !Pattern !DataSet -> (![GroupStart], ![Result])
 search pattern data
 	# node_refs = find pattern.lexeme data
 	# results = [make_result features n data \\ n <|- node_refs]
-	= flatten (group pattern.groups results)
+	# (group_starts,results) = group 0 0 pattern.groups results
+	= (group_starts, flatten results)
 where
 	(before,after) = pattern.context_size
 
@@ -145,7 +146,7 @@ where
 			| not pattern.skip_article
 				=
 					[ (i, [i])
-					\\ i <- if backwards [node-n..node] [node+1..node+n]
+					\\ i <- if backwards [node,node-1..node-n+1] [node+1..node+n]
 					| 0 <= i && i < size data.nodes &&
 						get_node_feature otype data.nodes.[i] == "word"
 					]
@@ -169,16 +170,31 @@ where
 		where
 			node = data.nodes.[node_ref]
 
-	group [] results
-		= [results]
-	group [rule:rules] results
-		= sortBy
-			((>) `on` length)
-			[flatten (group rules g) \\ g <- groups rule results]
+	group :: !Int !Int ![Group] ![Result] -> (![GroupStart], ![[Result]])
+	group _ _ [] results
+		= ([], [results])
+	group rule_index result_index [rule:rules] results
+		# results = sortBy ((>) `on` length) (groups rule results)
+		# group_starts = make_group_starts rule_index result_index rule results
+		# (extra_group_starts,results) = unzip [group (rule_index+1) (result_index+gs.result_index) rules g \\ g <- results & gs <- group_starts]
+		# group_starts = mergeBy ((<) `on` \gs -> gs.result_index) group_starts (flatten extra_group_starts)
+		= (group_starts, flatten results)
 
+	groups :: !Group ![Result] -> [[Result]]
 	groups _ []
 		= []
 	groups g=:{word,feature} [r:rs]
 		# val = fromJust ('Map'.get feature r.words.[word+before].ResultWord.features)
 		# (yes,no) = partition (\r -> fromJust ('Map'.get feature r.words.[word+before].ResultWord.features) == val) rs
 		= [[r:yes]:groups g no]
+
+	make_group_starts :: !Int !Int !Group ![[Result]] -> [GroupStart]
+	make_group_starts _ _ _ [] = []
+	make_group_starts rule_index result_index rule=:{word,feature} [g:groups] =
+		[
+			{ group_index  = rule_index
+			, result_index = result_index
+			, value        = fromJust ('Map'.get feature (hd g).words.[word+before].ResultWord.features)
+			}
+		: make_group_starts rule_index (result_index+length g) rule groups
+		]

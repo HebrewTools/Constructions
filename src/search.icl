@@ -21,8 +21,8 @@ import Constructions
 derive JSONEncode Pattern, Group, GroupFeature
 derive JSONDecode Pattern, Group, GroupFeature
 
-derive gBinaryEncodingSize GroupFeature, Result, ResultWord, Reference, Book, Map
-derive gBinaryEncode GroupFeature, Result, ResultWord, Reference, Book, Map
+derive gBinaryEncodingSize GroupFeature, Result, ResultWord, Reference, Book, Map, GroupStart
+derive gBinaryEncode GroupFeature, Result, ResultWord, Reference, Book, Map, GroupStart
 
 Start w
 	# (home,w) = getEnvironmentVariable "HOME" w

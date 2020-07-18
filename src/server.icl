@@ -30,10 +30,11 @@ JSONDecode{|DataSet|} _ _ = abort "JSONDecode{|DataSet|}\n"
 gText{|DataSet|} _ _ = abort "gText{|DataSet|}\n"
 gEditor{|DataSet|} = abort "gEditor{|DataSet|}\n"
 
+derive class iTask GroupStart
 derive gEq Pattern, Group, GroupFeature, Result, ResultWord, Reference, Book
 derive JSONEncode Pattern, Group, GroupFeature, Result, ResultWord, Reference, Book
 derive JSONDecode Pattern, Group, GroupFeature, Result, ResultWord, Reference, Book
-derive gBinaryDecode GroupFeature, Result, ResultWord, Reference, Book, Map
+derive gBinaryDecode GroupFeature, Result, ResultWord, Reference, Book, Map, GroupStart
 derive gText Pattern, Group, GroupFeature, Result, ResultWord, Reference, Book
 
 gEditor{|Result|} = abort "gEditor{|Result|}\n"
@@ -97,26 +98,44 @@ gEditor{|Pattern|} = bijectEditorValue
 			(viewConstantValue "Group the results on:" textView)
 			gEditor{|*|}))
 
-resultsEditor :: Editor (Pattern, [Result])
+resultsEditor :: Editor (Pattern, ([GroupStart], [Result]))
 resultsEditor = comapEditorValue format htmlView
 where
-	format :: !(!Pattern, ![Result]) -> HtmlTag
-	format (pattern, results) = TableTag [ClassAttr "results"]
+	format :: !(!Pattern, !(![GroupStart], ![Result])) -> HtmlTag
+	format (pattern, (groups, results)) = TableTag [ClassAttr "results"]
 		[ TheadTag []
 			[ TrTag [] $
+				[ThTag [] [Text (toString word+++"."+++toString feature)] \\ {word,feature} <- pattern.groups] ++
 				[ThTag [] [Text "Reference"]] ++
 				[ThTag [] [Text (toString i)] \\ i <- [after,after-1..0-before]]
 			]
-		, TbodyTag []
-			[ TrTag []
-				[ TdTag [] [Text (formatReference reference)]
-				: reverse [TdTag [] (wordToHtml w) \\ w <-: words]
-				]
-			\\ {reference,words} <- results
-			]
+		, TbodyTag [] (makeTableRows 0 groups results)
 		]
 	where
 		(before,after) = pattern.context_size
+
+		makeTableRows _ _ [] = []
+		makeTableRows i groups [r:rs] =
+			[ TrTag [] $
+				[ TdTag [] $ case [g \\ g <- these_groups | g.group_index==j] of
+					[]    -> []
+					[g:_] -> [DivTag [ClassAttr "group"] [Text ('Text'.concat
+						[ toString word
+						, "."
+						, toString feature
+						, ": "
+						, g.GroupStart.value
+						])]]
+				\\ {word,feature} <- pattern.groups
+				& j <- [0..]
+				] ++
+				[ TdTag [] [Text (formatReference r.reference)]
+				: reverse [TdTag [] (wordToHtml w) \\ w <-: r.words]
+				]
+			: makeTableRows (i+1) rest_groups rs
+			]
+		where
+			(these_groups,rest_groups) = span (\g -> g.result_index==i) groups
 
 		formatReference {book,chapter,verse} = 'Text'.concat
 			[ englishName book
@@ -188,7 +207,7 @@ stopSearchBackend =
 			removeTask id topLevelTasks
 
 // TODO: using stdout for the communication is rather slow...
-search :: !Pattern -> Task [Result]
+search :: !Pattern -> Task ([GroupStart], [Result])
 search pattern = ApplyLayout replaceWithLoader @>> (
 	wait (\b -> isNothing b || not (snd (fromJust b))) search_backend >-|
 	maybeStartSearchBackend >-|
@@ -278,7 +297,7 @@ main =
 				Nothing ->
 					catchAll (
 						search pattern >>- \results ->
-						if (isEmpty results)
+						if (isEmpty (snd results))
 							(Hint "Warning:" @>> viewInformation [] "No results." @! ())
 							(viewInformation [ViewUsing (tuple pattern) resultsEditor] results @! ())
 					)

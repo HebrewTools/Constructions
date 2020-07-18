@@ -44,6 +44,12 @@ from Bible import :: Reference
 	, features :: !Map GroupFeature String //* Relevant features
 	}
 
+:: GroupStart =
+	{ group_index  :: !Int    //* Index into the `Pattern.groups` list
+	, result_index :: !Int    //* Index into the results list of `search`
+	, value        :: !String //* Value of the feature we group on
+	}
+
 instance toString GroupFeature
 
 //* The text-fabric features required to use this module (use when calling `import_tf`).
@@ -52,5 +58,12 @@ required_features :: [String]
 //* Check whether a pattern contains any errors.
 check_pattern :: !Pattern -> Maybe String
 
-//* Search for a pattern.
-search :: !Pattern !DataSet -> [Result]
+/**
+ * Search for a pattern.
+ *
+ * @param The pattern to search and group.
+ * @param The ETCBC data set.
+ * @result A list of places where groups, as defined in the pattern, start.
+ * @result The actual results.
+ */
+search :: !Pattern !DataSet -> (![GroupStart], ![Result])

@@ -30,10 +30,11 @@ table.results tbody tr:nth-child(2n+1) {
 
 table.results td {
 	padding: 1px 0;
+	vertical-align: top;
 }
 
-table.results td:nth-child(n+2) {
-	vertical-align: top;
+table.results div.group {
+	padding-right: 1em;
 }
 
 table.results .hebrew {
