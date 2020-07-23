@@ -180,7 +180,7 @@ where
 		# results = sortBy ((>) `on` length) (groups rule results)
 		# group_starts = make_group_starts rule_index result_index rule results
 		# (extra_group_starts,results) = unzip
-			[ group (rule_index+1) (result_index+gs.result_index) rules g
+			[ group (rule_index+1) gs.result_index rules g
 			\\ g <- results
 			& gs <- group_starts
 			]
