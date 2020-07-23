@@ -146,7 +146,7 @@ where
 			| not pattern.skip_article
 				=
 					[ (i, [i])
-					\\ i <- if backwards [node,node-1..node-n+1] [node+1..node+n]
+					\\ i <- if backwards [node,node-1..node-n+1] [node..node+n-1]
 					| 0 <= i && i < size data.nodes &&
 						get_node_feature otype data.nodes.[i] == "word"
 					]
