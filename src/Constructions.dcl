@@ -33,6 +33,7 @@ from Bible import :: Reference
 	| State
 	| VerbalStem
 	| VerbalTense
+	| PronominalSuffix
 
 :: Result =
 	{ reference :: !Reference    //* Book, chapter, and verse

@@ -29,6 +29,7 @@ required_features =
 	, "ls"
 	, "nu"
 	, "pdp"
+	, "prs"
 	, "ps"
 	, "sp"
 	, "st"
@@ -50,6 +51,7 @@ where
 	toString State              = "st"
 	toString VerbalStem         = "vs"
 	toString VerbalTense        = "vt"
+	toString PronominalSuffix   = "prs"
 
 instance == GroupFeature
 where
@@ -63,6 +65,7 @@ where
 	(==) State              x = x=:State
 	(==) VerbalStem         x = x=:VerbalStem
 	(==) VerbalTense        x = x=:VerbalTense
+	(==) PronominalSuffix   x = x=:PronominalSuffix
 
 instance < GroupFeature where (<) x y = toString x < toString y
 

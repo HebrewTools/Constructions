@@ -56,30 +56,33 @@ where
 		, "State"
 		, "Verbal stem"
 		, "Verbal tense"
+		, "Pronominal suffix"
 		]
 
-	toInt Lexeme             = 0
-	toInt PartOfSpeech       = 1
-	toInt PhraseDependentPoS = 2
-	toInt LexicalSet         = 3
-	toInt Gender             = 4
-	toInt Number             = 5
-	toInt Person             = 6
-	toInt State              = 7
-	toInt VerbalStem         = 8
-	toInt VerbalTense        = 9
+	toInt Lexeme             =  0
+	toInt PartOfSpeech       =  1
+	toInt PhraseDependentPoS =  2
+	toInt LexicalSet         =  3
+	toInt Gender             =  4
+	toInt Number             =  5
+	toInt Person             =  6
+	toInt State              =  7
+	toInt VerbalStem         =  8
+	toInt VerbalTense        =  9
+	toInt PronominalSuffix   = 10
 
-	fromInt 0 = Lexeme
-	fromInt 1 = PartOfSpeech
-	fromInt 2 = PhraseDependentPoS
-	fromInt 3 = LexicalSet
-	fromInt 4 = Gender
-	fromInt 5 = Number
-	fromInt 6 = Person
-	fromInt 7 = State
-	fromInt 8 = VerbalStem
-	fromInt 9 = VerbalTense
-	fromInt _ = Lexeme
+	fromInt  0 = Lexeme
+	fromInt  1 = PartOfSpeech
+	fromInt  2 = PhraseDependentPoS
+	fromInt  3 = LexicalSet
+	fromInt  4 = Gender
+	fromInt  5 = Number
+	fromInt  6 = Person
+	fromInt  7 = State
+	fromInt  8 = VerbalStem
+	fromInt  9 = VerbalTense
+	fromInt 10 = PronominalSuffix
+	fromInt  _ = Lexeme
 
 FIELD_WIDTH :== widthAttr (ExactSize 80)
 
