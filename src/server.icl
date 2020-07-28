@@ -298,8 +298,8 @@ derive gDefault TaskListFilter, TaskId
 derive gEq TaskMeta, TaskChange, InstanceType
 derive JSONEncode TaskChange
 derive JSONDecode TaskChange
-derive gText TaskMeta, TaskChange, InstanceType, Set
-derive gEditor TaskMeta, TaskChange, InstanceType, Set
+derive gText TaskMeta, TaskChange, InstanceType
+derive gEditor TaskMeta, TaskChange, InstanceType
 
 sessions :: SDSLens () (TaskId,[TaskMeta]) [TaskMeta]
 sessions =: sdsFocus (TaskId 0 0, TaskId 0 0, gDefault{|*|}, onlySessions) taskListMetaData
