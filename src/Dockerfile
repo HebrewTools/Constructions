@@ -27,7 +27,7 @@ run dpkg --add-architecture i386 && \
 	apt-get install -qq libc6-i386 curl
 
 run mkdir -p /root/text-fabric-data/etcbc/bhsa/tf/c && \
-	for f in book chapter g_word_utf8 gn lex ls nu otype oslots pdp ps sp st trailer_utf8 verse vs vt; do \
+	for f in book chapter g_word_utf8 gn lex ls nu otype oslots pdp prs ps sp st trailer_utf8 verse vs vt; do \
 		curl https://raw.githubusercontent.com/ETCBC/bhsa/master/tf/c/$f.tf -o /root/text-fabric-data/etcbc/bhsa/tf/c/$f.tf; \
 	done
 
