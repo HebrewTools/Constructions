@@ -1,7 +1,6 @@
 implementation module Constructions
 
 import StdEnv
-import StdMaybe
 
 import Control.Applicative
 import Data.Func
@@ -69,27 +68,27 @@ where
 
 instance < GroupFeature where (<) x y = toString x < toString y
 
-check_pattern :: !Pattern -> Maybe String
+check_pattern :: !Pattern -> ?String
 check_pattern {lexeme,groups,context_size=ctx=:(before,after)} =
 	empty_lexeme <|>
 	illegal_context <|>
-	foldl (\ok g -> ok <|> check_group g) Nothing groups
+	foldl (\ok g -> ok <|> check_group g) ?None groups
 where
-	empty_lexeme = if (size lexeme == 0) (Just "The lexeme may not be empty.") Nothing
+	empty_lexeme = if (size lexeme == 0) (?Just "The lexeme may not be empty.") ?None
 
 	illegal_context
 		| before < 0
-			= Just "The before-context may not be negative."
+			= ?Just "The before-context may not be negative."
 		| after < 0
-			= Just "The before-context may not be negative."
-			= Nothing
+			= ?Just "The before-context may not be negative."
+			= ?None
 
 	check_group {word,feature}
 		| (word < 0 && word < 0-before) || (word > 0 && word > after)
-			= Just ("A group uses word "+++toString word+++" which is outside the context.")
+			= ?Just ("A group uses word "+++toString word+++" which is outside the context.")
 		| word == 0 && feature=:Lexeme
-			= Just "It is not necessary to group on (0, Lexeme)."
-			= Nothing
+			= ?Just "It is not necessary to group on (0, Lexeme)."
+			= ?None
 
 search :: !Pattern !DataSet -> (![GroupStart], ![Result])
 search pattern data
@@ -136,7 +135,7 @@ where
 			}
 		}
 	where
-		(Just verse_ref) = get_first_ancestor_node_with (isOfType "verse") node_ref data
+		(?Just verse_ref) = get_first_ancestor_node_with (isOfType "verse") node_ref data
 
 		// Each result tuple consists of the actual word, and a list of nodes
 		// that can be used for displaying (the latter may for instance include

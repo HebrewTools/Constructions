@@ -2,7 +2,6 @@ module search
 
 import StdDebug
 import StdEnv
-import StdMaybe
 
 import Data.Encoding.GenBinary
 import Data.Error

@@ -1,11 +1,10 @@
 definition module Constructions
 
-from StdMaybe import :: Maybe
 from StdOverloaded import class toString
 
 from Data.Map import :: Map
 
-from TextFabric import :: DataSet
+from TextFabric import :: DataSet, :: DataSet`, :: EdgeSet
 
 from Bible import :: Reference
 
@@ -57,7 +56,7 @@ instance toString GroupFeature
 required_features :: [String]
 
 //* Check whether a pattern contains any errors.
-check_pattern :: !Pattern -> Maybe String
+check_pattern :: !Pattern -> ?String
 
 /**
  * Search for a pattern.
